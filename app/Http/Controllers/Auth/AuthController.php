@@ -29,7 +29,7 @@ class AuthController extends Controller
      * @var string
      */
     protected $redirectTo = '/';
-
+   
     /**
      * Create a new authentication controller instance.
      *
@@ -37,7 +37,10 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware($this->guestMiddleware(), ['except' => 'logout']);
+        //$this->middleware('auth'); 
+        $this->middleware(['auth','register_users'],['only'=>['register','showRegistrationForm']]);
+        $this->middleware($this->guestMiddleware(), ['except' => ['register','logout','showRegistrationForm']]);
+        
     }
 
     /**
@@ -49,7 +52,9 @@ class AuthController extends Controller
     protected function validator(array $data)
     {
         return Validator::make($data, [
-            'name' => 'required|max:255',
+            'idno' => 'required|max:255',
+            'fname' => 'required|max:255',
+            'lname' => 'required|max:255',
             'email' => 'required|email|max:255|unique:users',
             'password' => 'required|min:6|confirmed',
         ]);
@@ -64,9 +69,22 @@ class AuthController extends Controller
     protected function create(array $data)
     {
         return User::create([
-            'name' => $data['name'],
+            'idno' => $data['idno'],
+            'fname'=> $data['fname'],
+            'mname'=> $data['mname'],
+            'lname'=> $data['lname'],
+            'ename'=>$data['ename'],
+            'accesslevel'=>$data['accesslevel'],
             'email' => $data['email'],
             'password' => bcrypt($data['password']),
         ]);
     }
+    
+    public function loginUsername()
+    {
+        return property_exists($this, 'idno') ? $this->username : 'idno';
+    }
+    
+   
+    
 }

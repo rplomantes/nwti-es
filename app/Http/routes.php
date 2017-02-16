@@ -10,7 +10,14 @@
 | and give it the controller to call when that URI is requested.
 |
 */
-
-Route::get('/', function () {
-    return view('welcome');
+Route::group(['middleware' => 'web'], function () {
+Route::auth();
+Route::get('/','MainController@index');
+/* routes for registrar*/
+Route::get('enrollmentrequest','RegistrarController\EnrollmentRequest@requestlist');
+Route::get('registration','RegistrarController\Registration@index');
+Route::get('newstudent','RegistrarController\Registration@newstudent');
 });
+
+/*Ajax Registrar*/
+Route::get('getid','AjaxRegistrarController\GetId@getid');

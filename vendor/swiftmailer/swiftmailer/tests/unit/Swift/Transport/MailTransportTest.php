@@ -465,7 +465,50 @@ class Swift_Transport_MailTransportTest extends \SwiftMailerTestCase
         $transport->send($message);
     }
 
-    // -- Creation Methods
+    /**
+     * @expectedException \Swift_TransportException
+     * @expectedExceptionMessage Cannot send message without a recipient
+     */
+    public function testExceptionWhenNoRecipients()
+    {
+        $invoker = $this->_createInvoker();
+        $invoker->shouldReceive('mail');
+        $dispatcher = $this->_createEventDispatcher();
+        $transport = $this->_createTransport($invoker, $dispatcher);
+
+        $headers = $this->_createHeaders();
+        $message = $this->_createMessage($headers);
+
+        $transport->send($message);
+    }
+
+    public function noExceptionWhenRecipientsExistProvider()
+    {
+        return array(
+            array('To'),
+            array('Cc'),
+            array('Bcc'),
+        );
+    }
+
+    /**
+     * @dataProvider noExceptionWhenRecipientsExistProvider
+     *
+     * @param string $header
+     */
+    public function testNoExceptionWhenRecipientsExist($header)
+    {
+        $invoker = $this->_createInvoker();
+        $invoker->shouldReceive('mail');
+        $dispatcher = $this->_createEventDispatcher();
+        $transport = $this->_createTransport($invoker, $dispatcher);
+
+        $headers = $this->_createHeaders();
+        $message = $this->_createMessage($headers);
+        $message->shouldReceive(sprintf('get%s', $header))->andReturn(array('foo@bar' => 'Foo'));
+
+        $transport->send($message);
+    }
 
     private function _createTransport($invoker, $dispatcher)
     {
